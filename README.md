@@ -12,3 +12,13 @@ Dokeshi is a Static Site Generator in Go , made as a part of fun weekend project
 - Using [blackfriday](https://github.com/russross/blackfriday) for markdown processor.
 - Using [chroma](https://github.com/alecthomas/chroma/) for syntax highlighting.
 - Using [etree](https://github.com/beevik/etree) for generating RSS in XML.
+
+### Building:
+
+- Install Golang.
+
+- Generate the build :
+
+```bash
+$ go build main.go
+```

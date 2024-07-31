@@ -30,6 +30,33 @@ type TagsGenerator struct {
 	Config *TagsConfig
 }
 
+func createTag(tags []string) []*Tag {
+	var result []*Tag
+	for _, tag := range tags {
+		result = append(result, &Tag{Name: tag, Link: getTagLink(tag)})
+	}
+	return result
+}
+
+func generateTagPage(tag string, posts []*Post, t *template.Template,
+	destination string, writer *IndexWriter) error {
+	if err := clearAndCreateDestination(destination); err != nil {
+		return err
+	}
+
+	lg := ListingGenerator{&ListingConfig{
+		Posts:       posts,
+		Template:    t,
+		Destination: destination,
+		PageTitle:   tag,
+		Writer:      writer,
+	}}
+	if err := lg.Generate(); err != nil {
+		return err
+	}
+	return nil
+}
+
 // utils
 func getTagLink(tag string) string {
 	return fmt.Sprintf("/tags/%s/", strings.ToLower(tag))

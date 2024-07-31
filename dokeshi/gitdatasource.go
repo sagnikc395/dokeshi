@@ -3,6 +3,7 @@ package dokeshi
 import (
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 )
 
@@ -69,6 +70,30 @@ func clearFolder(path string) error {
 		if err = os.RemoveAll(filepath.Join(path, name)); err != nil {
 			return fmt.Errorf("❌ Error clearing file %s: %v", name, err)
 		}
+	}
+	return nil
+}
+
+func cloneRepo(path, repoURL, branch string) error {
+	cmdName := "git"
+	initargs := []string{"init", "."}
+	cmd := exec.Command(cmdName, initargs...)
+	cmd.Dir = path
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("❌ Error initializing git repo at %s: %v", path, err)
+	}
+
+	remoteArgs := []string{"remote", "add", "origin", repoURL}
+	cmd = exec.Command(cmdName, remoteArgs...)
+	cmd.Dir = path
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("❌ Error setting remote %s: %v", repoURL, err)
+	}
+	pullArgs := []string{"pull", "origin", branch}
+	cmd = exec.Command(cmdName, pullArgs...)
+	cmd.Dir = path
+	if err := cmd.Run(); err != nil {
+		return fmt.Errorf("error pulling %s at %s: %v", branch, path, err)
 	}
 	return nil
 }

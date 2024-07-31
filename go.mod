@@ -9,5 +9,6 @@ require (
 
 require (
 	github.com/alecthomas/chroma/v2 v2.14.0 // indirect
+	github.com/beevik/etree v1.4.1 // indirect
 	github.com/dlclark/regexp2 v1.11.0 // indirect
 )

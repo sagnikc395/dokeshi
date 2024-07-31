@@ -4,6 +4,8 @@ import (
 	"flag"
 	"fmt"
 	"os"
+
+	"github.com/sagnikc395/dokeshi/dokeshi"
 )
 
 func main() {
@@ -14,10 +16,10 @@ func main() {
 	argNums := len(os.Args)
 
 	if argNums < 2 {
-		cli.Run()
+		dokeshi.Run()
 	} else {
 		if *serveFlag {
-			cli.Serve()
+			dokeshi.Serve()
 		} else {
 			fmt.Println("Please check the arguments.")
 		}

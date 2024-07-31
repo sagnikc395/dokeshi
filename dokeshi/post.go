@@ -3,6 +3,7 @@ package dokeshi
 import (
 	"fmt"
 	"html/template"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 )
@@ -75,4 +76,33 @@ func newPost(path, dateFormat string) (*Post, error) {
 	name := filepath.Base(path)
 
 	return &Post{Name: name, Meta: meta, HTML: html, ImagesDir: imagesDir, Images: images}, nil
+}
+
+func getImages(path string) (string, []string, error) {
+	dirPath := filepath.Join(path, "images")
+	files, err := ioutil.ReadDir(dirPath)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return "", nil, nil
+		}
+		return "", nil, fmt.Errorf("Error while reading folder %s: %v", dirPath, err)
+	}
+	images := []string{}
+	for _, file := range files {
+		images = append(images, file.Name())
+	}
+	return dirPath, images, nil
+}
+
+// utility methods
+func (p ByDateDesc) Len() int {
+	return len(p)
+}
+
+func (p ByDateDesc) Swap(i, j int) {
+	p[i], p[j] = p[j], p[i]
+}
+
+func (p ByDateDesc) Less(i, j int) bool {
+	return p[i].Meta.ParsedDate.After(p[j].Meta.ParsedDate)
 }

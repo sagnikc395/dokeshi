@@ -3,9 +3,12 @@ package dokeshi
 import (
 	"fmt"
 	"html/template"
-	"io/ioutil"
 	"os"
 	"path/filepath"
+	"time"
+
+	"github.com/russross/blackfriday"
+	"gopkg.in/yaml.v2"
 )
 
 // post holds the data for a post
@@ -78,9 +81,44 @@ func newPost(path, dateFormat string) (*Post, error) {
 	return &Post{Name: name, Meta: meta, HTML: html, ImagesDir: imagesDir, Images: images}, nil
 }
 
+func getMeta(path, dateFormat string) (*Meta, error) {
+	//configuration options present in meta.yaml
+	filePath := filepath.Join(path, "meta.yaml")
+	metaraw, err := os.ReadFile(filePath)
+	if err != nil {
+		return nil, fmt.Errorf("Error while reading file %s: %v", filePath, err)
+	}
+	meta := Meta{}
+	err = yaml.Unmarshal(metaraw, &meta)
+	if err != nil {
+		return nil, fmt.Errorf("Error reading yml in %s: %v", filePath, err)
+	}
+	parsedData, err := time.Parse(dateFormat, meta.Date)
+	if err != nil {
+		return nil, fmt.Errorf("Error parsing date in %s: %v", filePath, err)
+	}
+	meta.ParsedDate = parsedData
+	return &meta, nil
+}
+
+func getHTML(path string) ([]byte, error) {
+	filePath := filepath.Join(path, "post.md")
+	input, err := os.ReadFile(filePath)
+	if err != nil {
+		return nil, fmt.Errorf("Error while reading file %s: %v", filePath, err)
+	}
+
+	html := blackfriday.MarkdownCommon(input)
+	replaced, err := replaceCodeParts(html)
+	if err != nil {
+		return nil, fmt.Errorf("Error during syntax highlighting of %s: %v", filePath, err)
+	}
+	return []byte(replaced), nil
+}
+
 func getImages(path string) (string, []string, error) {
 	dirPath := filepath.Join(path, "images")
-	files, err := ioutil.ReadDir(dirPath)
+	files, err := os.ReadDir(dirPath)
 	if err != nil {
 		if os.IsNotExist(err) {
 			return "", nil, nil

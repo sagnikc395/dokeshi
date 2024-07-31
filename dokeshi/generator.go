@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"strings"
 	"time"
 )
 
@@ -142,7 +143,7 @@ func (i *IndexWriter) WriteIndexHTML(path, pageTitle, metaDscp string, content t
 		canonicalLink = buildCanonicalLink(path, i.BlogURL)
 	}
 
-	id := IndexData{
+	td := IndexData{
 		Name:            i.BlogAuthor,
 		Year:            time.Now().Year(),
 		HTMLTitle:       getHTMLTitle(pageTitle, i.BlogTitle),
@@ -168,4 +169,19 @@ func getHTMLTitle(pageTitle, blogTitle string) string {
 		return blogTitle
 	}
 	return fmt.Sprintf("%s - %s", pageTitle, blogTitle)
+}
+
+func buildCanonicalLink(path, baseURL string) string {
+	parts := strings.Split(path, "/")
+	if len(parts) > 1 {
+		return fmt.Sprintf("%s/%s/index.html", baseURL, strings.Join(parts[1:], "/"))
+	}
+	return "/"
+}
+
+func getNumsOfPagesOnFrontpage(posts []*Post, numposts int) int {
+	if len(posts) < numposts {
+		return len(posts)
+	}
+	return numposts
 }

@@ -1,8 +1,11 @@
 package dokeshi
 
 import (
+	"bufio"
+	"bytes"
 	"fmt"
 	"html/template"
+	"os"
 	"path/filepath"
 	"sort"
 	"time"
@@ -48,7 +51,7 @@ type SiteConfig struct {
 
 // create a new sitegenerator
 func New(config *SiteConfig) *SiteGenerator {
-	return &SiteGenerator{Config: config.Config}
+	return &SiteGenerator{Config: config}
 }
 
 // generate the start of the static blog
@@ -85,4 +88,84 @@ func (g *SiteGenerator) Generate() error {
 	}
 	fmt.Println("⚡️ Finished generating the site.")
 	return nil
+}
+
+func getTemplate(path string) (*template.Template, error) {
+	t, err := template.ParseFiles(path)
+	if err != nil {
+		return nil, fmt.Errorf("❌ Error reading template %s: %v", path, err)
+	}
+	return t, nil
+}
+
+func clearAndCreateDestination(path string) error {
+	if err := os.RemoveAll(path); err != nil {
+		if !os.IsNotExist(err) {
+			return fmt.Errorf("❌ Error removing fodler at destination %s: %v", path, err)
+		}
+	}
+	return os.Mkdir(path, os.ModePerm)
+}
+
+//indexwriter will create the index.html files
+
+type IndexWriter struct {
+	BlogTitle       string
+	BlogDescription string
+	BlogAuthor      string
+	BlogURL         string
+}
+
+// writeIndexHTML will write the index.html file
+func (i *IndexWriter) WriteIndexHTML(path, pageTitle, metaDscp string, content template.HTML,
+	t *template.Template, canonicalLink string) error {
+
+	filepath := filepath.Join(path, "index.html")
+	f, err := os.Create(filepath)
+	if err != nil {
+		return fmt.Errorf("❌ Error creating file %s: %v", filepath, err)
+	}
+	defer f.Close()
+
+	metaDesc := metaDscp
+	if metaDesc == "" {
+		metaDesc = i.BlogDescription
+	}
+
+	hlBuffer := bytes.Buffer{}
+	hlw := bufio.NewWriter(&hlBuffer)
+	formatter.WriteCSS(hlw, styles.Lovelace)
+	hlw.Flush()
+	w := bufio.NewWriter(f)
+
+	if canonicalLink == "" {
+		canonicalLink = buildCanonicalLink(path, i.BlogURL)
+	}
+
+	id := IndexData{
+		Name:            i.BlogAuthor,
+		Year:            time.Now().Year(),
+		HTMLTitle:       getHTMLTitle(pageTitle, i.BlogTitle),
+		PageTitle:       pageTitle,
+		Content:         content,
+		CanonicalLink:   canonicalLink,
+		MetaDescription: metaDesc,
+		HighlightCSS:    template.CSS(hlbuf.String()),
+	}
+	if err := t.Execute(w, td); err != nil {
+		return fmt.Errorf("❌ Error executing template %s: %v", filepath, err)
+	}
+
+	if err := w.Flush(); err != nil {
+		return fmt.Errorf("❌ Error writing file %s: %v", filepath, err)
+	}
+
+	return nil
+
+}
+func getHTMLTitle(pageTitle, blogTitle string) string {
+	if pageTitle == "" {
+		return blogTitle
+	}
+	return fmt.Sprintf("%s - %s", pageTitle, blogTitle)
 }

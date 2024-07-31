@@ -81,6 +81,26 @@ func newPost(path, dateFormat string) (*Post, error) {
 	return &Post{Name: name, Meta: meta, HTML: html, ImagesDir: imagesDir, Images: images}, nil
 }
 
+func copyImagesDir(source, destination string) (err error) {
+	path := filepath.Join(destination, "images")
+	if err := os.Mkdir(path, os.ModePerm); err != nil {
+		return fmt.Errorf("Error creating images directory at %s: %v", path, err)
+	}
+
+	files, err := os.ReadDir(source)
+	if err != nil {
+		return fmt.Errorf("error reading directory %s: %v", path, err)
+	}
+	for _, file := range files {
+		src := filepath.Join(source, file.Name())
+		dst := filepath.Join(path, file.Name())
+		if err := copyFile(src, dst); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func getMeta(path, dateFormat string) (*Meta, error) {
 	//configuration options present in meta.yaml
 	filePath := filepath.Join(path, "meta.yaml")

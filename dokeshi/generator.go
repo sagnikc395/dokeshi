@@ -185,3 +185,8 @@ func getNumsOfPagesOnFrontpage(posts []*Post, numposts int) int {
 	}
 	return numposts
 }
+
+func runTasks(posts []*Post, t *template.Template, destination string,
+	cfg *Config) error {
+
+}

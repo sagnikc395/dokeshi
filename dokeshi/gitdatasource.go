@@ -97,3 +97,25 @@ func cloneRepo(path, repoURL, branch string) error {
 	}
 	return nil
 }
+
+func getContentFolders(path string) ([]string, error) {
+	var result []string
+	dir, err := os.Open(path)
+	if err != nil {
+		return nil, fmt.Errorf("❌ Error accessing directory %s: %v", path, err)
+	}
+
+	defer dir.Close()
+
+	files, err := dir.ReadDir(-1)
+	if err != nil {
+		return nil, fmt.Errorf("❌ Error reading contents of directory %s: %v", path, err)
+	}
+
+	for _, file := range files {
+		if file.IsDir() && file.Name()[0] != '.' {
+			result = append(result, filepath.Join(path, file.Name()))
+		}
+	}
+	return result, nil
+}

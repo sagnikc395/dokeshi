@@ -73,3 +73,35 @@ func createFolderIfNotExist(path string) error {
 	}
 	return nil
 }
+
+// generate method for statistics
+func (g *StaticsGenerator) Generate() error {
+	fmt.Println("\tCopying Statics...")
+	fileToDest := g.Config.FileToDestination
+	templateToFile := g.Config.TemplateToFile
+	t := g.Config.Template
+	for k, v := range fileToDest {
+		if err := createFolderIfNotExist(getFolder(v)); err != nil {
+			return err
+		}
+
+		if err := copyFile(k, v); err != nil {
+			return err
+		}
+	}
+	for k, v := range templateToFile {
+		if err := createFolderIfNotExist(getFolder(v)); err != nil {
+			return err
+		}
+
+		content, err := os.ReadFile(k)
+		if err != nil {
+			return fmt.Errorf("Error reading file %s: %v", k, err)
+		}
+		if err := g.Config.Writer.WriteIndexHTML(getFolder(v), getTitle(k), getTitle(k), template.HTML(content), t, ""); err != nil {
+			return err
+		}
+	}
+	fmt.Println("\tFinished Copying the statics✅")
+	return nil
+}

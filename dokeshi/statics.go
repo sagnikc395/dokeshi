@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
+	"strings"
 	"text/template"
 )
 
@@ -45,5 +47,29 @@ func copyFile(src, dst string) error {
 		return fmt.Errorf("Error writing file %s: %v", dst, err)
 	}
 
+	return nil
+}
+
+func getFolder(path string) string {
+	return filepath.Dir(path)
+}
+
+func getTitle(path string) string {
+	ext := filepath.Ext(path)
+	name := filepath.Base(path)
+	fileName := name[:len(name)-len(ext)]
+	return fmt.Sprintf("%s%s", strings.ToUpper(string(fileName[0])), fileName[1:])
+}
+
+func createFolderIfNotExist(path string) error {
+	if _, err := os.Stat(path); err != nil {
+		if os.IsNotExist(err) {
+			if err = os.Mkdir(path, os.ModePerm); err != nil {
+				return fmt.Errorf("error creating directory %s: %v", path, err)
+			}
+		} else {
+			return fmt.Errorf("error accessing directory %s: %v", path, err)
+		}
+	}
 	return nil
 }

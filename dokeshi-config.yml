@@ -1,0 +1,25 @@
+generator:
+  repo: "https://github.com/sagnikc395/dokeshi"
+  branch: "main"
+  tmp: "tmp"
+  dest: "www"
+  userss: true
+blog:
+  url: "https://www.sagnikc395.github.io"
+  language: "en-us"
+  description: "Blog on Mathematical Logic,CS and Fundamentals!"
+  dateformat: "02.01.2006"
+  title: "thoughts and ideas"
+  author: "Sagnik Chatterjee"
+  frontpageposts: 10
+  statics:
+    files:
+      - src: "static/favicon.ico"
+        dest: "favicon.ico"
+      - src: "static/robots.txt"
+        dest: "robots.txt"
+      - src: "static/about.png"
+        dest: "about.png"
+    templates:
+      - src: "static/about.html"
+        dest: "about"

@@ -16,7 +16,7 @@ func main() {
 	argNums := len(os.Args)
 
 	if argNums < 2 {
-		dokeshi.cli.Run()
+		dokeshi.Run()
 	} else {
 		if *serveFlag {
 			dokeshi.Serve()

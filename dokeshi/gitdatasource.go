@@ -3,6 +3,7 @@ package dokeshi
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 )
 
 // git as our source of truth
@@ -47,6 +48,26 @@ func createFolderIfNotExists(path string) error {
 			}
 		} else {
 			return fmt.Errorf("❌ Error Accessing directory %s: %v", path, err)
+		}
+	}
+	return nil
+}
+
+func clearFolder(path string) error {
+	dir, err := os.Open(path)
+	if err != nil {
+		return fmt.Errorf("❌ Error Accessing directory %s: %v", path, err)
+	}
+	defer dir.Close()
+
+	names, err := dir.Readdirnames(-1)
+	if err != nil {
+		return fmt.Errorf("❌ Error reading directory %s: %v", path, err)
+	}
+
+	for _, name := range names {
+		if err = os.RemoveAll(filepath.Join(path, name)); err != nil {
+			return fmt.Errorf("❌ Error clearing file %s: %v", name, err)
 		}
 	}
 	return nil
